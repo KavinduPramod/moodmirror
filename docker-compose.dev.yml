@@ -1,0 +1,28 @@
+services:
+  # Redis for caching and sessions (with password authentication)
+  redis:
+    image: redis:7-alpine
+    container_name: moodmirror-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    restart: unless-stopped
+    networks:
+      - moodmirror-dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    env_file:
+      - .env
+
+volumes:
+  redis_dev_data:
+    driver: local
+
+networks:
+  moodmirror-dev:
+    driver: bridge
