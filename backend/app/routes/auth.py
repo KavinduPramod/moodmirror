@@ -107,8 +107,14 @@ async def reddit_oauth_callback(request: OAuthCallbackRequest):
             user_agent=settings.REDDIT_USER_AGENT
         )
         
-        # Get access token
-        access_token = reddit.auth.authorize(request.code)
+        # Authorize and get access token
+        reddit.auth.authorize(request.code)
+        
+        # Extract the access token from PRAW's session
+        # PRAW stores it internally in _core._authorizer.access_token
+        access_token = reddit.auth._reddit._core._authorizer.access_token
+        
+        logger.debug(f"Access token obtained: {access_token[:20] if access_token else 'None'}...")
         
         # Get Reddit username
         user = reddit.user.me()

@@ -8,7 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.db.session import init_db, check_db_connection
 from app.services.redis_service import check_redis_connection
-from app.routes import auth
+from app.routes import auth, analysis
+from app.services.model_service import get_model_service
 import logging
 
 # Configure logging
@@ -69,6 +70,7 @@ async def get_frontend_config():
 
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+app.include_router(analysis.router, prefix="/analysis", tags=["Analysis"])
 
 
 @app.on_event("startup")
@@ -96,6 +98,16 @@ async def startup_event():
             logger.error("Failed to connect to database")
     except Exception as e:
         logger.error(f"Database initialization error: {e}")
+    
+    # Load ML model
+    try:
+        model_service = get_model_service()
+        if model_service.load_model():
+            logger.info("ML model loaded successfully")
+        else:
+            logger.warning("ML model failed to load - analysis features will be unavailable")
+    except Exception as e:
+        logger.error(f"ML model loading error: {e}")
 
 
 @app.on_event("shutdown")

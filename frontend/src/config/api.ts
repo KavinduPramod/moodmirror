@@ -35,11 +35,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Clear session and redirect to login
-      sessionStorage.removeItem('session_token');
-      globalThis.location.href = '/';
-    }
+    // Don't auto-logout on 401 - let the component handle it
+    // if (error.response?.status === 401) {
+    //   sessionStorage.removeItem('session_token');
+    //   globalThis.location.href = '/';
+    // }
     return Promise.reject(error);
   }
 );
@@ -53,5 +53,8 @@ export const endpoints = {
     callback: '/auth/reddit/callback',
     logout: '/auth/logout',
   },
-  analyze: '/analyze',
+  analysis: {
+    analyze: '/analysis/analyze',
+    status: '/analysis/status',
+  },
 };

@@ -4,7 +4,7 @@
  */
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { HomePage, CallbackPage, DashboardPage } from './pages';
+import { HomePage, CallbackPage, DashboardPage, ResultsPage } from './pages';
 
 function App() {
   return (
@@ -13,6 +13,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/auth/callback" element={<CallbackPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/results" element={<ResultsPage />} />
       </Routes>
     </BrowserRouter>
   );

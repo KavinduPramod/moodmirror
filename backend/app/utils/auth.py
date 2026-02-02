@@ -9,6 +9,7 @@ from jose import JWTError, jwt
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.config import settings
+from app.services.redis_service import get_session
 import secrets
 
 security = HTTPBearer()
@@ -79,19 +80,38 @@ def verify_token(token: str) -> dict:
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
     """
     FastAPI dependency to get current authenticated user
+    Retrieves full session data from Redis including reddit_access_token
     
     Usage:
         @app.get("/protected")
         async def protected_route(user: dict = Depends(get_current_user)):
             return {"username": user["username"]}
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     token = credentials.credentials
+    logger.debug(f"Verifying token: {token[:20]}...")
+    
     payload = verify_token(token)
     
     if "username" not in payload:
+        logger.error("Token payload missing username")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token payload"
         )
     
-    return payload
+    # Get full session data from Redis (includes reddit_access_token)
+    logger.debug(f"Fetching session from Redis for user: {payload['username']}")
+    session_data = await get_session(token)
+    
+    if not session_data:
+        logger.error(f"Session not found in Redis for token: {token[:20]}...")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session expired or not found. Please log in again."
+        )
+    
+    logger.debug(f"Session found for user: {session_data.get('username')}")
+    return session_data
