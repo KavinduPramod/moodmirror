@@ -72,6 +72,10 @@ async def get_frontend_config():
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(analysis.router, prefix="/analysis", tags=["Analysis"])
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Docker"""
+    return {"status": "healthy", "message": "MoodMirror API is running"}
 
 @app.on_event("startup")
 async def startup_event():
