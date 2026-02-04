@@ -7,6 +7,10 @@ __pycache__/
 venv/
 env/
 ENV/
+*.egg
+*.egg-info
+dist/
+build/
 
 # Environment
 .env
@@ -35,3 +39,12 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Model files (mounted as volume)
+models/
+*.pt
+*.pth
+
+# Git
+.git
+.gitignore
