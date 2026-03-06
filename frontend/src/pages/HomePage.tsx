@@ -3,11 +3,11 @@
  * Landing page with Reddit OAuth login
  */
 
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Shield, Brain, Lock, ArrowRight } from 'lucide-react';
-import { Logo, Button, Card } from '../components';
+import { useEffect, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Shield, Brain, Lock, ArrowRight, ChevronDown, Users, Activity, Database } from 'lucide-react';
+import { Logo, Button, Card, Footer } from '../components';
 import { useAuthStore } from '../stores/authStore';
 
 // Reddit SVG icon
@@ -37,9 +37,58 @@ const features = [
   },
 ];
 
+const steps = [
+  {
+    step: '01',
+    title: 'Connect Your Reddit Account',
+    description: 'Sign in securely using Reddit OAuth. We never see your password — Reddit handles authentication directly.',
+  },
+  {
+    step: '02',
+    title: 'AI Analyses Your Activity',
+    description: 'Our BERT + BiLSTM model scans your recent posts and comments, extracting 8 behavioural signals including sentiment, posting patterns, and community engagement.',
+  },
+  {
+    step: '03',
+    title: 'Receive Your Risk Report',
+    description: 'View your personalised mental health risk assessment with confidence scores, behavioural insights, and curated support resources.',
+  },
+];
+
+const stats = [
+  { icon: Users, value: '1,500+', label: 'Users in Training Dataset' },
+  { icon: Database, value: '35+', label: 'Mental Health Subreddits' },
+  { icon: Activity, value: '8', label: 'Behavioural Features Analysed' },
+  { icon: Brain, value: 'BERT', label: 'Transformer Model Used' },
+];
+
+const faqs = [
+  {
+    q: 'Is this a medical diagnosis?',
+    a: 'No. MoodMirror is a research prototype and not a substitute for professional medical advice. Always consult a qualified mental health professional for accurate assessment and treatment.',
+  },
+  {
+    q: 'Does MoodMirror store my Reddit data?',
+    a: 'No. Your posts and comments are fetched in real-time solely for analysis and are never stored on our servers. Once your session ends, all data is discarded.',
+  },
+  {
+    q: 'How accurate is the model?',
+    a: 'The model was trained and validated on real Reddit data using BERT + BiLSTM architecture. It reports a confidence score with each result. Accuracy varies and the tool should not be used for clinical decisions.',
+  },
+  {
+    q: 'Who can see my results?',
+    a: 'Only you. Results are displayed in your browser session and are not saved or shared with any third party.',
+  },
+  {
+    q: 'What if I need immediate help?',
+    a: 'If you are in crisis, please call or text 988 (Suicide & Crisis Lifeline) immediately. You can also visit our Resources page for a full list of support lines.',
+  },
+];
+
 export function HomePage() {
   const navigate = useNavigate();
   const { initOAuth, isLoading, error, isAuthenticated, checkAuth, clearError } = useAuthStore();
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -62,6 +111,11 @@ export function HomePage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-slate-900/50 backdrop-blur-lg border-b border-white/5">
         <div className="container-narrow flex justify-between items-center h-16">
           <Logo size="sm" />
+          <nav className="hidden md:flex items-center gap-6 text-sm text-slate-400">
+            <Link to="/about" className="hover:text-white transition-colors">About</Link>
+            <Link to="/resources" className="hover:text-white transition-colors">Resources</Link>
+            <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
+          </nav>
           <Button variant="secondary" size="sm" onClick={handleLogin} isLoading={isLoading}>
             Sign In
           </Button>
@@ -141,41 +195,110 @@ export function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {features.map((feature, index) => (
                 <Card key={feature.title} hover delay={0.4 + index * 0.1}>
-                  <feature.icon
-                    size={40}
-                    className="text-purple-400 mb-4"
-                    strokeWidth={1.5}
-                  />
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    {feature.title}
-                  </h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">
-                    {feature.description}
-                  </p>
+                  <feature.icon size={40} className="text-purple-400 mb-4" strokeWidth={1.5} />
+                  <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">{feature.description}</p>
                 </Card>
+              ))}
+            </div>
+          </section>
+
+          {/* Stats Banner */}
+          <section className="py-10">
+            <div className="glass-card p-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                {stats.map((stat, index) => (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 + index * 0.1 }}
+                  >
+                    <stat.icon size={24} className="text-purple-400 mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-white">{stat.value}</p>
+                    <p className="text-xs text-slate-400 mt-1">{stat.label}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* How It Works */}
+          <section className="py-12 md:py-16">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">How It Works</h2>
+              <p className="text-slate-400">Three simple steps to understand your mental well-being</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+              {steps.map((step, index) => (
+                <motion.div
+                  key={step.step}
+                  className="relative"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + index * 0.15 }}
+                >
+                  <div className="glass-card p-6 h-full">
+                    <span className="text-4xl font-black gradient-text block mb-3">{step.step}</span>
+                    <h3 className="text-lg font-semibold text-white mb-2">{step.title}</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed">{step.description}</p>
+                  </div>
+                  {index < steps.length - 1 && (
+                    <div className="hidden md:block absolute top-10 -right-4 text-slate-600 text-2xl z-10">→</div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </section>
+
+          {/* FAQ */}
+          <section className="py-12 md:py-16">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Frequently Asked Questions</h2>
+            </div>
+            <div className="max-w-2xl mx-auto space-y-3">
+              {faqs.map((faq, index) => (
+                <motion.div
+                  key={index}
+                  className="glass-card overflow-hidden"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                >
+                  <button
+                    className="w-full flex justify-between items-center p-5 text-left"
+                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                  >
+                    <span className="font-medium text-white pr-4">{faq.q}</span>
+                    <ChevronDown
+                      size={18}
+                      className={`text-slate-400 flex-shrink-0 transition-transform duration-200 ${
+                        openFaq === index ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+                  <AnimatePresence>
+                    {openFaq === index && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <p className="px-5 pb-5 text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-3">
+                          {faq.a}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               ))}
             </div>
           </section>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="py-8 border-t border-white/5">
-        <div className="container-narrow text-center">
-          <p className="text-slate-500 text-sm">
-            © 2026 MoodMirror. Built for mental health awareness.
-          </p>
-          <p className="text-slate-500 text-sm mt-2">
-            If you're in crisis, please contact{' '}
-            <a
-              href="tel:988"
-              className="text-purple-400 hover:text-purple-300 transition-colors"
-            >
-              988 Suicide & Crisis Lifeline
-            </a>
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

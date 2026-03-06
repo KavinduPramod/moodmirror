@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.db.session import init_db, check_db_connection
 from app.services.redis_service import check_redis_connection
-from app.routes import auth, analysis
+from app.routes import auth, analysis, contact
 from app.services.model_service import get_model_service
 import logging
 
@@ -71,6 +71,7 @@ async def get_frontend_config():
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(analysis.router, prefix="/analysis", tags=["Analysis"])
+app.include_router(contact.router, tags=["Contact"])
 
 @app.get("/health")
 async def health_check():
