@@ -195,19 +195,32 @@ docker compose up --build -d
 ```
 
 This starts:
-- Backend API on `http://localhost:8000`
-- Redis on `localhost:6379`
+- **Frontend** on `http://localhost:5173` (Vite dev server with hot reload)
+- **Backend API** on `http://localhost:8000`
+- **Redis** on `localhost:6379`
 
 Notes:
 - MariaDB is **not** started by this Compose file (uses your existing external MariaDB).
 - Backend reads DB credentials from `backend/.env`.
-- Model file is mounted from `./model` into the backend container.
+- Model file is mounted from `${MODEL_DIR}` (from root `.env`) into the backend container.
+- Frontend automatically builds and runs with hot reload enabled.
 
 Useful commands:
 
 ```bash
+# View logs
 docker compose logs -f backend
+docker compose logs -f frontend
+docker compose logs -f redis
+
+# Stop all services
 docker compose down
+
+# Rebuild images
+docker compose build --no-cache
+
+# Remove volumes (Redis data)
+docker compose down -v
 ```
 
 ---
