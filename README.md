@@ -186,6 +186,30 @@ cd backend
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
+### Run Backend with Docker
+
+From project root:
+
+```bash
+docker compose up --build -d
+```
+
+This starts:
+- Backend API on `http://localhost:8000`
+- Redis on `localhost:6379`
+
+Notes:
+- MariaDB is **not** started by this Compose file (uses your existing external MariaDB).
+- Backend reads DB credentials from `backend/.env`.
+- Model file is mounted from `./model` into the backend container.
+
+Useful commands:
+
+```bash
+docker compose logs -f backend
+docker compose down
+```
+
 ---
 
 ## Environment Variables

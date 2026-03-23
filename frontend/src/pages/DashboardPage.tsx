@@ -72,7 +72,7 @@ export function DashboardPage() {
     return (
       <div className="bg-animated min-h-screen">
         <InsufficientDataCard
-          data={insufficientData}
+          data={insufficientData as any}
           onBack={() => clearError()}
         />
       </div>
@@ -224,7 +224,7 @@ export function DashboardPage() {
               {error && (
                 <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg mb-4">
                   <p className="text-sm text-red-400 flex items-start gap-2">
-                    <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
+                    <AlertTriangle size={16} className="mt-0.5 shrink-0" />
                     {error}
                   </p>
                 </div>

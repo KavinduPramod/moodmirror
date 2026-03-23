@@ -5,7 +5,7 @@
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import {
-  HomePage, CallbackPage, DashboardPage, ResultsPage,
+  HomePage, CallbackPage, DashboardPage, ManualUploadPage, ResultsPage,
   AboutPage, ResourcesPage, PrivacyPage, TermsPage,
   ContactPage, NotFoundPage
 } from './pages';
@@ -15,6 +15,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/manual-upload" element={<ManualUploadPage />} />
         <Route path="/auth/callback" element={<CallbackPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/results" element={<ResultsPage />} />

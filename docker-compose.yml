@@ -1,0 +1,63 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: moodmirror-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      MODEL_PATH: /app/model/moodmirror_model.pt
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ${MODEL_DIR}:/app/model:ro
+    restart: unless-stopped
+    networks:
+      - moodmirror
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: moodmirror-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - moodmirror
+
+  redis:
+    image: redis:7-alpine
+    container_name: moodmirror-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    restart: unless-stopped
+    networks:
+      - moodmirror
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    env_file:
+      - .env
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  moodmirror:
+    driver: bridge

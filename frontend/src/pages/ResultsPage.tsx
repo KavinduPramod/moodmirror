@@ -28,24 +28,26 @@ export function ResultsPage() {
   const { isAuthenticated, username, logout, isLoading, checkAuth } = useAuthStore();
   const { result, clearResult } = useAnalysisStore();
 
-  // Check if this is demo mode (insufficient real data augmented with synthetic)
-  const isDemoMode = result?.stats?.data_quality?.posts_analyzed < 40 && result !== null;
-
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Allow viewing results if:
+    // 1. User is authenticated (Reddit), OR
+    // 2. User has a result (manual upload)
+    // Otherwise, redirect to home
+    if (!isAuthenticated && !result) {
       navigate('/');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, result, navigate]);
 
   useEffect(() => {
-    if (!result) {
+    // If user is authenticated but has no result, redirect to dashboard
+    if (isAuthenticated && !result) {
       navigate('/dashboard');
     }
-  }, [result, navigate]);
+  }, [isAuthenticated, result, navigate]);
 
   const handleLogout = async () => {
     await logout();
@@ -54,10 +56,14 @@ export function ResultsPage() {
 
   const handleNewAnalysis = () => {
     clearResult();
-    navigate('/dashboard');
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    } else {
+      navigate('/manual-upload');
+    }
   };
 
-  if (!isAuthenticated || !result) {
+  if (!result) {
     return null;
   }
 
@@ -72,19 +78,33 @@ export function ResultsPage() {
         <div className="container-narrow flex justify-between items-center h-16">
           <Logo size="sm" />
           <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 text-slate-300">
-              <User size={16} />
-              <span className="text-sm">u/{username}</span>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              isLoading={isLoading}
-              icon={<LogOut size={16} />}
-            >
-              <span className="hidden sm:inline">Logout</span>
-            </Button>
+            {isAuthenticated && (
+              <>
+                <div className="hidden sm:flex items-center gap-2 text-slate-300">
+                  <User size={16} />
+                  <span className="text-sm">u/{username}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  isLoading={isLoading}
+                  icon={<LogOut size={16} />}
+                >
+                  <span className="hidden sm:inline">Logout</span>
+                </Button>
+              </>
+            )}
+            {!isAuthenticated && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/manual-upload')}
+                icon={<ArrowLeft size={16} />}
+              >
+                <span className="hidden sm:inline">Back</span>
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -92,26 +112,6 @@ export function ResultsPage() {
       {/* Main Content */}
       <main className="flex-1 pt-24 pb-16">
         <div className="container-narrow">
-          {/* Demo Mode Banner */}
-          {isDemoMode && (
-            <motion.div
-              className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="flex items-start gap-3">
-                <AlertCircle className="text-amber-400 mt-0.5" size={20} />
-                <div>
-                  <h3 className="font-semibold text-amber-400 mb-1">Demo Mode Active</h3>
-                  <p className="text-sm text-slate-300">
-                    Your account has insufficient data for production analysis. Results are augmented with 
-                    synthetic posts for testing purposes. Build up to 40+ posts over 30+ days for accurate personalized analysis.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-          
           {/* Back Button */}
           <Button variant="ghost" size="sm" onClick={handleNewAnalysis} className="mb-6">
             <ArrowLeft size={16} />

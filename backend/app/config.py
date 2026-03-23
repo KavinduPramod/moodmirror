@@ -14,7 +14,6 @@ class Settings(BaseSettings):
     ENV: str = "development"
     DEBUG: bool = True
     RELOAD: bool = True  # Hot reload for development
-    DEMO_MODE: bool = True  # Enable demo mode for testing without sufficient data
     
     # API Configuration
     API_HOST: str = "0.0.0.0"

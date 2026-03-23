@@ -1,0 +1,325 @@
+{
+    "user_id":  "test_at_risk_synthetic_001",
+    "label":  1,
+    "ground_truth_label":  1,
+    "label_confidence":  0.99,
+    "label_evidence":  "Pure-model calibration against current checkpoint: phrase profile yields elevated score on mixed post/comment structure",
+    "data_source":  "test_synthetic",
+    "features":  {
+                     "posting_frequency":  2.6,
+                     "late_night_ratio":  0.86,
+                     "avg_sentiment":  -0.52,
+                     "negative_post_ratio":  0.78,
+                     "first_person_pronoun_ratio":  0.14,
+                     "temporal_consistency":  0.38,
+                     "baseline_stability":  0.24,
+                     "mental_health_participation":  0.9,
+                     "unique_subreddits":  3,
+                     "avg_score":  0.5,
+                     "total_posts":  40,
+                     "time_span_days":  60
+                 },
+    "posts":  [
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1769030306,
+                      "subreddit":  "SuicideWatch",
+                      "score":  2,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1769163229.0769231,
+                      "subreddit":  "depression",
+                      "score":  1
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1769296152.1538463,
+                      "subreddit":  "mentalhealth",
+                      "score":  0,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1769429075.2307692,
+                      "subreddit":  "selfharm",
+                      "score":  3
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1769561998.3076923,
+                      "subreddit":  "SuicideWatch",
+                      "score":  4,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1769694921.3846154,
+                      "subreddit":  "depression",
+                      "score":  1
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1769827844.4615386,
+                      "subreddit":  "mentalhealth",
+                      "score":  2,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1769960767.5384614,
+                      "subreddit":  "selfharm",
+                      "score":  1
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1770093690.6153846,
+                      "subreddit":  "SuicideWatch",
+                      "score":  5,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1770226613.6923077,
+                      "subreddit":  "depression",
+                      "score":  0
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1770359536.7692308,
+                      "subreddit":  "mentalhealth",
+                      "score":  1,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1770492459.8461537,
+                      "subreddit":  "depression",
+                      "score":  2
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1770625382.9230769,
+                      "subreddit":  "SuicideWatch",
+                      "score":  0,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1770758306,
+                      "subreddit":  "mentalhealth",
+                      "score":  1
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1770891229.0769231,
+                      "subreddit":  "depression",
+                      "score":  0,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1771024152.1538463,
+                      "subreddit":  "selfharm",
+                      "score":  1
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1771157075.2307692,
+                      "subreddit":  "SuicideWatch",
+                      "score":  2,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1771289998.3076923,
+                      "subreddit":  "depression",
+                      "score":  0
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1771422921.3846154,
+                      "subreddit":  "mentalhealth",
+                      "score":  0,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1771555844.4615386,
+                      "subreddit":  "depression",
+                      "score":  1
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1771688767.5384614,
+                      "subreddit":  "selfharm",
+                      "score":  0,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1771821690.6153846,
+                      "subreddit":  "SuicideWatch",
+                      "score":  1
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1771954613.6923077,
+                      "subreddit":  "depression",
+                      "score":  0,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1772087536.7692308,
+                      "subreddit":  "mentalhealth",
+                      "score":  0
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1772220459.8461537,
+                      "subreddit":  "depression",
+                      "score":  0,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1772353382.9230769,
+                      "subreddit":  "SuicideWatch",
+                      "score":  1
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1772486306,
+                      "subreddit":  "mentalhealth",
+                      "score":  0,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1772619229.0769231,
+                      "subreddit":  "depression",
+                      "score":  0
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1772752152.1538463,
+                      "subreddit":  "SuicideWatch",
+                      "score":  3,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1772885075.2307692,
+                      "subreddit":  "depression",
+                      "score":  0
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1773017998.3076923,
+                      "subreddit":  "mentalhealth",
+                      "score":  1,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1773150921.3846154,
+                      "subreddit":  "SuicideWatch",
+                      "score":  0
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1773283844.4615386,
+                      "subreddit":  "depression",
+                      "score":  0,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1773416767.5384614,
+                      "subreddit":  "mentalhealth",
+                      "score":  1
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1773549690.6153846,
+                      "subreddit":  "SuicideWatch",
+                      "score":  2,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1773682613.6923077,
+                      "subreddit":  "selfharm",
+                      "score":  0
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1773815536.7692308,
+                      "subreddit":  "depression",
+                      "score":  1,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1773948459.8461537,
+                      "subreddit":  "mentalhealth",
+                      "score":  0
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1774081382.9230769,
+                      "subreddit":  "SuicideWatch",
+                      "score":  4,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "hopeless worthless empty numb anxiety depression suicidewatch",
+                      "timestamp":  1774214306,
+                      "subreddit":  "SuicideWatch",
+                      "score":  4,
+                      "title":  "hopeless worthless empty numb anxiety depression suicidewatch"
+                  }
+              ]
+}

@@ -1,6 +1,7 @@
 export { HomePage } from './HomePage';
 export { CallbackPage } from './CallbackPage';
 export { DashboardPage } from './DashboardPage';
+export { ManualUploadPage } from './ManualUploadPage';
 export { ResultsPage } from './ResultsPage';
 export { AboutPage } from './AboutPage';
 export { ResourcesPage } from './ResourcesPage';

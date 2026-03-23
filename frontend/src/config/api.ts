@@ -55,6 +55,7 @@ export const endpoints = {
   },
   analysis: {
     analyze: '/analysis/analyze',
+    analyzeUpload: '/analysis/analyze-upload',
     status: '/analysis/status',
   },
 };

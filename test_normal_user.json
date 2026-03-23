@@ -1,0 +1,304 @@
+{
+    "user_id":  "test_normal_synthetic_001",
+    "label":  2,
+    "ground_truth_label":  2,
+    "label_confidence":  0.95,
+    "label_evidence":  "Low MH engagement, positive sentiment, daytime posting, healthy activity patterns",
+    "data_source":  "test_synthetic",
+    "features":  {
+                     "posting_frequency":  0.5,
+                     "late_night_ratio":  0.08,
+                     "avg_sentiment":  0.68,
+                     "negative_post_ratio":  0.05,
+                     "first_person_pronoun_ratio":  0.02,
+                     "temporal_consistency":  0.92,
+                     "baseline_stability":  0.95,
+                     "mental_health_participation":  0.0,
+                     "unique_subreddits":  12.0,
+                     "avg_score":  5.2,
+                     "total_posts":  40.0,
+                     "time_span_days":  90.0
+                 },
+    "posts":  [
+                  {
+                      "type":  "comment",
+                      "text":  "That\u0027s a great idea! I\u0027ve been doing something similar and it really helps me stay organized. The key is consistency and not overthinking it.",
+                      "timestamp":  1769030758,
+                      "subreddit":  "productivity",
+                      "score":  12
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Just finished reading an amazing book. Highly recommend it to anyone interested in science fiction. The world-building was incredible and the characters felt real.",
+                      "timestamp":  1769163681.0769231,
+                      "subreddit":  "books",
+                      "score":  28
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "Great tips! I especially loved your point about exercise. Started running recently and it\u0027s been making a huge difference in my energy levels.",
+                      "timestamp":  1769296604.1538463,
+                      "subreddit":  "HealthyFood",
+                      "score":  8
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "My dog learned a new trick today and I couldn\u0027t be happier! Here\u0027s a video of him doing his cute little dance. Made my whole week!",
+                      "timestamp":  1769429527.2307692,
+                      "subreddit":  "dogs",
+                      "score":  156
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "This is so helpful, thanks for sharing your experience. I\u0027m planning to try this approach myself!",
+                      "timestamp":  1769562450.3076923,
+                      "subreddit":  "learningprogramming",
+                      "score":  15
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Completed my first 5K run today! Feeling accomplished and excited about my fitness journey. Never thought I\u0027d be able to do this.",
+                      "timestamp":  1769695373.3846154,
+                      "subreddit":  "running",
+                      "score":  34
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "Lovely place! I visited last summer and had an amazing time. The people there were so friendly and welcoming.",
+                      "timestamp":  1769828296.4615386,
+                      "subreddit":  "travel",
+                      "score":  7
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Started a new hobby painting and it\u0027s been such a positive outlet. Here\u0027s my first attempt. Definitely room for improvement but I\u0027m proud!",
+                      "timestamp":  1769961219.5384614,
+                      "subreddit":  "art",
+                      "score":  42
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "How wonderful! Congratulations on the milestone. You must be so proud of your hard work and dedication.",
+                      "timestamp":  1770094142.6153846,
+                      "subreddit":  "GetMotivated",
+                      "score":  11
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "This made me smile! Such a positive and uplifting story. Thank you for sharing your success!",
+                      "timestamp":  1770227065.6923077,
+                      "subreddit":  "UpliftingNews",
+                      "score":  9
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Just finished a great workout. Feeling energized and proud of myself for staying consistent!",
+                      "timestamp":  1770359988.7692308,
+                      "subreddit":  "fitness",
+                      "score":  5
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Got promoted at work today! Never thought I\u0027d make it this far. Celebrating with friends tonight!",
+                      "timestamp":  1770492911.8461537,
+                      "subreddit":  "GetMotivated",
+                      "score":  12
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "Love spending time in nature. The fresh air and sunshine really do wonders for the soul.",
+                      "timestamp":  1770625834.9230769,
+                      "subreddit":  "outdoors",
+                      "score":  8
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Finally learned to play that song on guitar! Practice really does pay off.",
+                      "timestamp":  1770758758,
+                      "subreddit":  "Guitar",
+                      "score":  15
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "My partner surprised me with breakfast in bed this morning. Feeling so grateful.",
+                      "timestamp":  1770891681.0769231,
+                      "subreddit":  "relationships",
+                      "score":  10
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Completed my first half-marathon! I\u0027m so tired but so accomplished right now.",
+                      "timestamp":  1771024604.1538463,
+                      "subreddit":  "running",
+                      "score":  25
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "Just started reading this amazing book. Can\u0027t put it down!",
+                      "timestamp":  1771157527.2307692,
+                      "subreddit":  "books",
+                      "score":  3
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Baked cookies for the first time and they actually turned out great!",
+                      "timestamp":  1771290450.3076923,
+                      "subreddit":  "Baking",
+                      "score":  18
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "My best friend just got engaged! So happy for them. We\u0027re planning an epic celebratory trip.",
+                      "timestamp":  1771423373.3846154,
+                      "subreddit":  "wedding",
+                      "score":  7
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Finally fixed that leaky faucet myself. DIY projects give me so much satisfaction.",
+                      "timestamp":  1771556296.4615386,
+                      "subreddit":  "HomeImprovement",
+                      "score":  9
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "Just had an amazing conversation with my mentor. Feeling inspired and motivated.",
+                      "timestamp":  1771689219.5384614,
+                      "subreddit":  "PersonalDevelopment",
+                      "score":  6
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Adopted a rescue dog today! She\u0027s so sweet and I\u0027m already in love.",
+                      "timestamp":  1771822142.6153846,
+                      "subreddit":  "dogs",
+                      "score":  32
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "Just solved a problem at work that\u0027s been bugging me for weeks. Feels amazing!",
+                      "timestamp":  1771955065.6923077,
+                      "subreddit":  "programming",
+                      "score":  11
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Planning a vacation to Europe next month. So excited to explore new places!",
+                      "timestamp":  1772087988.7692308,
+                      "subreddit":  "travel",
+                      "score":  20
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "My kids had their school play today and they did amazing! So proud of them.",
+                      "timestamp":  1772220911.8461537,
+                      "subreddit":  "Parenting",
+                      "score":  8
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Just started taking online classes to learn a new skill. Excited about the possibilities!",
+                      "timestamp":  1772353834.9230769,
+                      "subreddit":  "education",
+                      "score":  13
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "Had lunch with old friends today. These connections are so valuable and uplifting.",
+                      "timestamp":  1772486758,
+                      "subreddit":  "socialskills",
+                      "score":  5
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Just hit a new personal record in the gym! All the hard work is paying off.",
+                      "timestamp":  1772619681.0769231,
+                      "subreddit":  "fitness",
+                      "score":  17
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "My garden is blooming beautifully this year. It\u0027s so therapeutic to watch things grow.",
+                      "timestamp":  1772752604.1538463,
+                      "subreddit":  "gardening",
+                      "score":  9
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Finally saved enough for a down payment on a house! Dreams really do come true.",
+                      "timestamp":  1772885527.2307692,
+                      "subreddit":  "PersonalFinance",
+                      "score":  28
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "Just finished a big project at work and got amazing feedback. Feeling validated!",
+                      "timestamp":  1773018450.3076923,
+                      "subreddit":  "GetMotivated",
+                      "score":  12
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Volunteering at the local animal shelter today. Love giving back to the community.",
+                      "timestamp":  1773151373.3846154,
+                      "subreddit":  "volunteering",
+                      "score":  14
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "Started meditation practice and I\u0027m already feeling more peaceful and centered.",
+                      "timestamp":  1773284296.4615386,
+                      "subreddit":  "Meditation",
+                      "score":  8
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Just celebrated my 5th anniversary! Marriage is such a beautiful journey.",
+                      "timestamp":  1773417219.5384614,
+                      "subreddit":  "anniversary",
+                      "score":  22
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "Got tickets to my favorite band\u0027s concert next month. I\u0027m beyond excited!",
+                      "timestamp":  1773550142.6153846,
+                      "subreddit":  "Music",
+                      "score":  10
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Started a new job today and the team is incredibly welcoming. Great first day!",
+                      "timestamp":  1773683065.6923077,
+                      "subreddit":  "jobs",
+                      "score":  19
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "Just finished a great book series. Those stories really sparked my imagination.",
+                      "timestamp":  1773815988.7692308,
+                      "subreddit":  "books",
+                      "score":  6
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "My cooking is improving so much! Tried a new recipe and everyone loved it.",
+                      "timestamp":  1773948911.8461537,
+                      "subreddit":  "cooking",
+                      "score":  16
+                  },
+                  {
+                      "type":  "comment",
+                      "text":  "Just had the best vacation ever. Feeling refreshed and grateful for the memories.",
+                      "timestamp":  1774081834.9230769,
+                      "subreddit":  "travel",
+                      "score":  11
+                  },
+                  {
+                      "type":  "post",
+                      "text":  "Reached my goal of learning a new language! Consistency and dedication really work.",
+                      "timestamp":  1774214758,
+                      "subreddit":  "languagelearning",
+                      "score":  24
+                  }
+              ]
+}

@@ -88,7 +88,7 @@ const faqs = [
 export function HomePage() {
   const navigate = useNavigate();
   const { initOAuth, isLoading, error, isAuthenticated, checkAuth, clearError } = useAuthStore();
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -173,7 +173,7 @@ export function HomePage() {
 
             {/* CTA Button */}
             <motion.div
-              className="flex justify-center"
+              className="flex flex-col sm:flex-row justify-center gap-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
@@ -185,7 +185,14 @@ export function HomePage() {
                 icon={<RedditIcon />}
               >
                 Connect with Reddit
-                <ArrowRight size={18} className="ml-1" />
+              </Button>
+              <Button
+                onClick={() => navigate('/manual-upload')}
+                variant="secondary"
+                size="lg"
+                icon={<ArrowRight size={18} />}
+              >
+                Manual Upload
               </Button>
             </motion.div>
           </section>
@@ -257,28 +264,28 @@ export function HomePage() {
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Frequently Asked Questions</h2>
             </div>
             <div className="max-w-2xl mx-auto space-y-3">
-              {faqs.map((faq, index) => (
+              {faqs.map((faq) => (
                 <motion.div
-                  key={index}
+                  key={faq.q}
                   className="glass-card overflow-hidden"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * index }}
+                  transition={{ delay: 0.1 * faqs.indexOf(faq) }}
                 >
                   <button
                     className="w-full flex justify-between items-center p-5 text-left"
-                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                    onClick={() => setOpenFaq(openFaq === faq.q ? null : faq.q)}
                   >
                     <span className="font-medium text-white pr-4">{faq.q}</span>
                     <ChevronDown
                       size={18}
-                      className={`text-slate-400 flex-shrink-0 transition-transform duration-200 ${
-                        openFaq === index ? 'rotate-180' : ''
+                      className={`text-slate-400 shrink-0 transition-transform duration-200 ${
+                        openFaq === faq.q ? 'rotate-180' : ''
                       }`}
                     />
                   </button>
                   <AnimatePresence>
-                    {openFaq === index && (
+                    {openFaq === faq.q && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
