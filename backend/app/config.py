@@ -20,9 +20,9 @@ class Settings(BaseSettings):
     API_PORT: int = 8000
     
     # Reddit API
-    REDDIT_CLIENT_ID: str
-    REDDIT_CLIENT_SECRET: str
-    REDDIT_REDIRECT_URI: str
+    REDDIT_CLIENT_ID: str = ""
+    REDDIT_CLIENT_SECRET: str = ""
+    REDDIT_REDIRECT_URI: str = ""
     REDDIT_USER_AGENT: str = "MoodMirror/1.0"
     
     # Database - MariaDB (separate credentials)

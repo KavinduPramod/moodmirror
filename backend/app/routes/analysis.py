@@ -4,7 +4,7 @@ Handles Reddit data fetching and ML analysis
 """
 
 from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.utils.auth import get_current_user
 from app.services.reddit_service import RedditService
 from app.services.model_service import get_model_service
@@ -18,6 +18,7 @@ router = APIRouter()
 
 class AnalysisRequest(BaseModel):
     """Request model for analysis"""
+    reddit_username: str = Field(min_length=3, max_length=64)
     limit: int = 100  # Number of posts/comments to fetch
 
 
@@ -57,29 +58,25 @@ async def analyze_user_activity(
         - Recommendations based on risk level
     """
     try:
-        logger.info(f"Starting analysis for user: {user['username']}")
+        logger.info(f"Starting analysis for app user: {user['username']} and reddit user: {request.reddit_username}")
         
         # Debug: Log what's in the user dict
         logger.debug(f"User dict keys: {user.keys()}")
         logger.debug(f"User dict: {user}")
         
-        # Get Reddit access token from session
-        access_token = user.get('reddit_access_token')
-        if not access_token:
-            logger.error(f"Reddit access token not found in session. Available keys: {list(user.keys())}")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Reddit access token not found. Please re-authenticate."
-            )
-        
-        # Fetch user activity from Reddit
+        # Fetch Reddit user activity by public username
         logger.info("Fetching Reddit activity...")
         try:
-            activity_data = RedditService.fetch_user_activity(
-                access_token=access_token,
+            activity_data = RedditService.fetch_user_activity_by_username(
+                username=request.reddit_username,
                 limit=request.limit,
                 include_comments=True,
                 include_submissions=True
+            )
+        except ValueError as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
             )
         except Exception as e:
             logger.error(f"Failed to fetch Reddit activity: {e}")
@@ -197,7 +194,10 @@ async def analyze_user_activity(
 
 
 @router.post("/analyze-upload", response_model=AnalysisResponse)
-async def analyze_uploaded_data(request: ManualUploadRequest):
+async def analyze_uploaded_data(
+    request: ManualUploadRequest,
+    user: dict = Depends(get_current_user)
+):
     """
     Analyze manually uploaded user data (for testing without Reddit authentication)
     
@@ -210,7 +210,7 @@ async def analyze_uploaded_data(request: ManualUploadRequest):
         - Recommendations based on risk level
     """
     try:
-        logger.info(f"Starting analysis for uploaded data: {request.user_id}")
+        logger.info(f"Starting analysis for uploaded data: {request.user_id} by {user['username']}")
         logger.info(f"Upload contains {len(request.posts)} posts")
 
         def normalize_timestamp(raw_timestamp) -> str:

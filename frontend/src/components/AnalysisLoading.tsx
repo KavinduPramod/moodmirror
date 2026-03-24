@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Heart, Activity, Lightbulb, Shield, Users, Clock, TrendingUp } from 'lucide-react';
 import { Card } from './Card';
+import { Button } from './Button';
 
 const MENTAL_HEALTH_FACTS = [
   {
@@ -61,9 +62,10 @@ const MENTAL_HEALTH_FACTS = [
 
 interface AnalysisLoadingProps {
   stage: 'fetching' | 'analyzing' | 'processing' | 'finalizing';
+  onCancel?: () => void;
 }
 
-export const AnalysisLoading: React.FC<AnalysisLoadingProps> = ({ stage }) => {
+export const AnalysisLoading: React.FC<AnalysisLoadingProps> = ({ stage, onCancel }) => {
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -133,7 +135,7 @@ export const AnalysisLoading: React.FC<AnalysisLoadingProps> = ({ stage }) => {
             </div>
             <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500"
+                className="h-full bg-linear-to-r from-purple-500 via-blue-500 to-purple-500"
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -208,6 +210,12 @@ export const AnalysisLoading: React.FC<AnalysisLoadingProps> = ({ stage }) => {
           This analysis typically takes 15-30 seconds. We're analyzing your posting patterns,
           sentiment, and behavioral indicators to provide personalized insights.
         </p>
+
+        {onCancel && (
+          <div className="flex justify-center mt-6">
+            <Button variant="secondary" onClick={onCancel}>Cancel</Button>
+          </div>
+        )}
       </motion.div>
     </div>
   );

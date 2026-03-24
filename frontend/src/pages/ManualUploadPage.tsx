@@ -1,6 +1,6 @@
 /**
  * Manual Upload Page
- * Allows users to upload and analyze data without Reddit authentication
+ * Allows authenticated users to upload and analyze JSON data
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -9,10 +9,12 @@ import { motion } from 'framer-motion';
 import { Upload, AlertTriangle, Loader2, ArrowRight, CheckCircle2, FileText } from 'lucide-react';
 import { Logo, Button, Card, AnalysisLoading } from '../components';
 import { useAnalysisStore } from '../stores/analysisStore';
+import { useAuthStore } from '../stores/authStore';
 
 export function ManualUploadPage() {
   const navigate = useNavigate();
   const { isAnalyzing, error, insufficientData, uploadData, clearError } = useAnalysisStore();
+  const { isAuthenticated, checkAuth } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -23,6 +25,16 @@ export function ManualUploadPage() {
     typeof insufficientData?.message === 'string'
       ? insufficientData.message
       : 'Insufficient data for reliable analysis. Upload at least 40 posts spanning 30+ days.';
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   // Simulate analysis stages for better UX
   useEffect(() => {
@@ -100,6 +112,10 @@ export function ManualUploadPage() {
   };
 
   // Show loading screen during analysis
+  if (!isAuthenticated) {
+    return null;
+  }
+
   if (isAnalyzing) {
     return <AnalysisLoading stage={analysisStage} />;
   }
@@ -165,7 +181,7 @@ export function ManualUploadPage() {
                 Manual Data Upload
               </h1>
               <p className="text-lg text-slate-400">
-                Upload your data for analysis without Reddit authentication
+                Upload your data for analysis using your authenticated session
               </p>
             </motion.div>
 

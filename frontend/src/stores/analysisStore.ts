@@ -5,6 +5,7 @@
 
 import { create } from 'zustand';
 import { api, endpoints } from '../config/api';
+import { AxiosError } from 'axios';
 
 interface AnalysisResult {
   username: string;
@@ -25,6 +26,18 @@ interface AnalysisResult {
     total_comments: number;
     total_submissions: number;
     total_text_length: number;
+    behavioral_features?: {
+      posting_frequency?: number;
+      late_night_ratio: number;
+      avg_sentiment: number;
+      negative_post_ratio: number;
+      mental_health_participation: number;
+      unique_subreddits: number;
+    };
+    feature_analysis?: {
+      alerts?: string[];
+    };
+    personalized_insights?: string[];
   };
   recommendations: string[];
   timestamp: string;
@@ -37,9 +50,11 @@ interface AnalysisState {
   error: string | null;
   insufficientData: Record<string, unknown> | null;
   modelReady: boolean;
+  analysisAbortController: AbortController | null;
 
   // Actions
-  runAnalysis: (limit?: number) => Promise<boolean>;
+  runAnalysis: (redditUsername: string, limit?: number) => Promise<boolean>;
+  cancelAnalysis: () => void;
   uploadData: (file: File) => Promise<boolean>;
   checkStatus: () => Promise<void>;
   clearResult: () => void;
@@ -62,6 +77,7 @@ export const useAnalysisStore = create<AnalysisState>((set) => ({
   error: null,
   insufficientData: null,
   modelReady: false,
+  analysisAbortController: null,
 
   // Check if model is ready
   checkStatus: async () => {
@@ -76,11 +92,16 @@ export const useAnalysisStore = create<AnalysisState>((set) => ({
   },
 
   // Run analysis
-  runAnalysis: async (limit = 100) => {
+  runAnalysis: async (redditUsername: string, limit = 100) => {
+    const controller = new AbortController();
+    set({ analysisAbortController: controller });
     set({ isAnalyzing: true, error: null, insufficientData: null });
     try {
       const response = await api.post(endpoints.analysis.analyze, {
+        reddit_username: redditUsername,
         limit,
+      }, {
+        signal: controller.signal,
       });
 
       set({
@@ -88,11 +109,22 @@ export const useAnalysisStore = create<AnalysisState>((set) => ({
         isAnalyzing: false,
         error: null,
         insufficientData: null,
+        analysisAbortController: null,
       });
 
       return true;
     } catch (err) {
       const error = err as ApiError;
+      const isCanceled = err instanceof AxiosError && err.code === 'ERR_CANCELED';
+      if (isCanceled) {
+        set({
+          isAnalyzing: false,
+          error: null,
+          insufficientData: null,
+          analysisAbortController: null,
+        });
+        return false;
+      }
       console.error('Analysis failed:', error);
       
       // Check if it's an insufficient data error
@@ -102,16 +134,32 @@ export const useAnalysisStore = create<AnalysisState>((set) => ({
           insufficientData: errorDetail,
           isAnalyzing: false,
           error: null,
+          analysisAbortController: null,
         });
       } else {
         set({
           error: typeof errorDetail === 'string' ? errorDetail : (error.message || 'Analysis failed'),
           isAnalyzing: false,
           insufficientData: null,
+          analysisAbortController: null,
         });
       }
       return false;
     }
+  },
+
+  cancelAnalysis: () => {
+    const state = useAnalysisStore.getState();
+    const controller = state.analysisAbortController;
+    if (controller) {
+      controller.abort();
+    }
+    set({
+      isAnalyzing: false,
+      error: null,
+      insufficientData: null,
+      analysisAbortController: null,
+    });
   },
 
   // Upload and analyze data

@@ -1,177 +1,179 @@
 """
 Authentication Routes
-Reddit OAuth flow and session management
+Native register/login and session management
 """
 
 from datetime import datetime, timedelta
+from typing import Annotated
 from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel
-import praw
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel, Field
 from app.config import settings
-from app.utils.auth import generate_state_token, create_access_token, get_current_user
-from app.services.redis_service import store_oauth_state, get_oauth_state, delete_oauth_state, store_session
+from app.utils.auth import create_access_token, get_current_user, hash_password, verify_password
+from app.services.redis_service import (
+    store_session,
+    delete_session,
+    store_auth_user,
+    get_auth_user,
+)
 import logging
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+security = HTTPBearer()
 
 
-class OAuthInitRequest(BaseModel):
-    redirect_uri: str
+class RegisterRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=255)
+    password: str = Field(min_length=8, max_length=128)
 
 
-class OAuthCallbackRequest(BaseModel):
-    code: str
-    state: str
+class LoginRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=255)
+    password: str = Field(min_length=8, max_length=128)
 
 
-@router.post("/reddit/init")
-async def init_reddit_oauth(request: OAuthInitRequest):
-    """
-    Initiate Reddit OAuth flow
-    
-    Returns:
-        - auth_url: Reddit authorization URL
-        - state: State token for CSRF protection
-    """
-    try:
-        # Generate state token for CSRF protection
-        state = generate_state_token()
-        
-        # Store state in Redis with 15 minute TTL (increased for slower connections)
-        await store_oauth_state(state, {
-            "redirect_uri": request.redirect_uri,
-            "created_at": str(datetime.utcnow())
-        }, ttl=900)
-        
-        # Create Reddit OAuth URL
-        reddit = praw.Reddit(
-            client_id=settings.REDDIT_CLIENT_ID,
-            client_secret=settings.REDDIT_CLIENT_SECRET,
-            redirect_uri=settings.REDDIT_REDIRECT_URI,
-            user_agent=settings.REDDIT_USER_AGENT
-        )
-        
-        auth_url = reddit.auth.url(
-            scopes=["identity", "history", "read"],
-            state=state,
-            duration="temporary"
-        )
-        
-        logger.info(f"OAuth initiated with state: {state[:10]}...")
-        
-        return {
-            "auth_url": auth_url,
-            "state": state
-        }
-        
-    except Exception as e:
-        logger.error(f"OAuth initialization failed: {e}")
+class AuthResponse(BaseModel):
+    session_token: str
+    expires_in: int
+    email: str
+
+
+def normalize_email(email: str) -> str:
+    normalized = email.strip().lower()
+    if "@" not in normalized or "." not in normalized.split("@")[-1]:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to initialize OAuth: {str(e)}"
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Please provide a valid email address"
         )
+    return normalized
 
 
-@router.post("/reddit/callback")
-async def reddit_oauth_callback(request: OAuthCallbackRequest):
-    """
-    Handle Reddit OAuth callback
-    
-    Returns:
-        - session_token: JWT token for subsequent requests
-        - expires_in: Token expiration time in seconds
-        - username: Reddit username
-    """
+@router.post("/register", response_model=AuthResponse)
+async def register_user(request: RegisterRequest):
     try:
-        # Verify state token
-        stored_state = await get_oauth_state(request.state)
-        if not stored_state:
-            logger.warning(f"Invalid or expired state token: {request.state[:10]}...")
+        email = normalize_email(request.email)
+
+        existing_user = get_auth_user(email)
+        if existing_user:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid or expired state token. Please try logging in again."
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already exists"
             )
-        
-        # Delete used state token (prevents replay attacks)
-        await delete_oauth_state(request.state)
-        
-        logger.info(f"Processing OAuth callback with state: {request.state[:10]}...")
-        
-        # Exchange code for access token
-        reddit = praw.Reddit(
-            client_id=settings.REDDIT_CLIENT_ID,
-            client_secret=settings.REDDIT_CLIENT_SECRET,
-            redirect_uri=settings.REDDIT_REDIRECT_URI,
-            user_agent=settings.REDDIT_USER_AGENT
+
+        password_hash = hash_password(request.password)
+        store_auth_user(
+            email,
+            {
+                "email": email,
+                "username": email,
+                "password_hash": password_hash,
+                "created_at": str(datetime.utcnow())
+            }
         )
-        
-        # Authorize and get access token
-        reddit.auth.authorize(request.code)
-        
-        # Extract the access token from PRAW's session
-        # PRAW stores it internally in _core._authorizer.access_token
-        access_token = reddit.auth._reddit._core._authorizer.access_token
-        
-        logger.debug(f"Access token obtained: {access_token[:20] if access_token else 'None'}...")
-        
-        # Get Reddit username
-        user = reddit.user.me()
-        username = user.name
-        
-        logger.info(f"OAuth successful for user: {username}")
-        
-        # Create JWT session token
+
         session_token = create_access_token(
-            data={"username": username},
+            data={"username": email, "email": email},
             expires_delta=timedelta(hours=settings.JWT_EXPIRATION_HOURS)
         )
-        
-        # Store session in Redis with Reddit access token
+
         await store_session(
             session_token,
             {
-                "username": username,
-                "reddit_access_token": access_token,
+                "username": email,
+                "email": email,
+                "auth_provider": "local",
                 "created_at": str(datetime.utcnow())
             },
             ttl=settings.JWT_EXPIRATION_HOURS * 3600
         )
-        
-        return {
-            "session_token": session_token,
-            "expires_in": settings.JWT_EXPIRATION_HOURS * 3600,
-            "username": username
-        }
-        
+
+        return AuthResponse(
+            session_token=session_token,
+            expires_in=settings.JWT_EXPIRATION_HOURS * 3600,
+            email=email
+        )
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise
+        logger.error(f"Registration failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Registration failed"
+        )
+
+
+@router.post("/login", response_model=AuthResponse)
+async def login_user(request: LoginRequest):
+    try:
+        email = normalize_email(request.email)
+        auth_user = get_auth_user(email)
+
+        if not auth_user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password"
+            )
+
+        if not verify_password(request.password, auth_user.get("password_hash", "")):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password"
+            )
+
+        session_token = create_access_token(
+            data={"username": email, "email": email},
+            expires_delta=timedelta(hours=settings.JWT_EXPIRATION_HOURS)
+        )
+
+        await store_session(
+            session_token,
+            {
+                "username": email,
+                "email": email,
+                "auth_provider": "local",
+                "created_at": str(datetime.utcnow())
+            },
+            ttl=settings.JWT_EXPIRATION_HOURS * 3600
+        )
+
+        return AuthResponse(
+            session_token=session_token,
+            expires_in=settings.JWT_EXPIRATION_HOURS * 3600,
+            email=email
+        )
+
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"OAuth callback failed: {e}")
+        logger.error(f"Login failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"OAuth callback failed: {str(e)}"
+            detail="Login failed"
         )
 
 
 @router.post("/logout")
-async def logout(user: dict = Depends(get_current_user)):
+async def logout(
+    user: Annotated[dict, Depends(get_current_user)],
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]
+):
     """
     Logout user and invalidate session
     """
     try:
-        # In a real implementation, you'd get the actual token
-        # For now, just return success
-        # await delete_session(token)
-        
+        await delete_session(credentials.credentials)
         logger.info(f"User logged out: {user['username']}")
-        
         return {"message": "Logged out successfully"}
-        
     except Exception as e:
         logger.error(f"Logout failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Logout failed"
         )
+
+
+@router.get("/me")
+async def get_me(user: Annotated[dict, Depends(get_current_user)]):
+    return {"email": user.get("email", user["username"])}

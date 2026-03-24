@@ -25,7 +25,7 @@ import { useAnalysisStore } from '../stores/analysisStore';
 
 export function ResultsPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, username, logout, isLoading, checkAuth } = useAuthStore();
+  const { isAuthenticated, email, logout, isLoading, checkAuth } = useAuthStore();
   const { result, clearResult } = useAnalysisStore();
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export function ResultsPage() {
               <>
                 <div className="hidden sm:flex items-center gap-2 text-slate-300">
                   <User size={16} />
-                  <span className="text-sm">u/{username}</span>
+                  <span className="text-sm">{email}</span>
                 </div>
                 <Button
                   variant="ghost"

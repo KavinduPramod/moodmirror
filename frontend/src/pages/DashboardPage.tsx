@@ -14,9 +14,10 @@ import { useAnalysisStore } from '../stores/analysisStore';
 
 export function DashboardPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, username, logout, isLoading: authLoading, checkAuth } = useAuthStore();
-  const { isAnalyzing, error, insufficientData, modelReady, runAnalysis, checkStatus, clearError } = useAnalysisStore();
+  const { isAuthenticated, email, logout, isLoading: authLoading, checkAuth } = useAuthStore();
+  const { isAnalyzing, error, insufficientData, modelReady, runAnalysis, cancelAnalysis, checkStatus, clearError } = useAnalysisStore();
   const [analysisLimit, setAnalysisLimit] = useState(100);
+  const [redditUsername, setRedditUsername] = useState('');
   const [analysisStage, setAnalysisStage] = useState<'fetching' | 'analyzing' | 'processing' | 'finalizing'>('fetching');
 
   useEffect(() => {
@@ -52,7 +53,10 @@ export function DashboardPage() {
 
   const handleStartAnalysis = async () => {
     clearError();
-    const success = await runAnalysis(analysisLimit);
+    if (!redditUsername.trim()) {
+      return;
+    }
+    const success = await runAnalysis(redditUsername.trim(), analysisLimit);
     if (success) {
       navigate('/results');
     }
@@ -61,6 +65,11 @@ export function DashboardPage() {
   const handleLogout = async () => {
     await logout();
     navigate('/');
+  };
+
+  const handleCancelAnalysis = () => {
+    cancelAnalysis();
+    clearError();
   };
 
   if (!isAuthenticated) {
@@ -81,7 +90,7 @@ export function DashboardPage() {
 
   // Show loading screen during analysis
   if (isAnalyzing) {
-    return <AnalysisLoading stage={analysisStage} />;
+    return <AnalysisLoading stage={analysisStage} onCancel={handleCancelAnalysis} />;
   }
 
   // Show error if analysis failed
@@ -109,7 +118,10 @@ export function DashboardPage() {
             <AlertTriangle size={64} className="text-red-400 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-white mb-2">Analysis Failed</h2>
             <p className="text-slate-400 mb-6">{error}</p>
-            <Button onClick={handleStartAnalysis}>Try Again</Button>
+            <div className="flex justify-center gap-3">
+              <Button onClick={handleStartAnalysis}>Try Again</Button>
+              <Button variant="secondary" onClick={handleCancelAnalysis}>Cancel</Button>
+            </div>
           </Card>
         </main>
       </div>
@@ -126,7 +138,7 @@ export function DashboardPage() {
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-2 text-slate-300">
               <User size={16} />
-              <span className="text-sm">u/{username}</span>
+              <span className="text-sm">{email}</span>
             </div>
             <Button
               variant="ghost"
@@ -162,14 +174,14 @@ export function DashboardPage() {
               Successfully Authenticated!
             </h1>
             <p className="text-lg text-slate-400 mb-6">
-              Welcome, <span className="text-purple-400 font-semibold">u/{username}</span>
+              Welcome, <span className="text-purple-400 font-semibold">{email}</span>
             </p>
 
             {/* Status Indicators */}
             <div className="flex flex-wrap justify-center gap-3 mb-8">
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20">
                 <CheckCircle size={16} className="text-green-400" />
-                <span className="text-sm text-green-400">Reddit Connected</span>
+                <span className="text-sm text-green-400">Session Active</span>
               </div>
               <div className={`flex items-center gap-2 px-4 py-2 rounded-full border ${
                 modelReady 
@@ -190,6 +202,22 @@ export function DashboardPage() {
             {/* Analysis Configuration */}
             <div className="text-left mb-6">
               <h3 className="text-lg font-semibold text-white mb-4">Configure Analysis</h3>
+
+              <div className="mb-4">
+                <label htmlFor="reddit-username" className="block text-sm text-slate-400 mb-2">
+                  Reddit username:
+                </label>
+                <input
+                  id="reddit-username"
+                  value={redditUsername}
+                  onChange={(event) => setRedditUsername(event.target.value)}
+                  placeholder="e.g. spez (without u/)"
+                  className="w-full px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-500"
+                />
+                <p className="text-xs text-slate-500 mt-2">
+                  We fetch public posts and comments from this username.
+                </p>
+              </div>
               
               <div className="mb-4">
                 <label className="block text-sm text-slate-400 mb-2">
@@ -233,7 +261,7 @@ export function DashboardPage() {
               <Button 
                 onClick={handleStartAnalysis}
                 fullWidth 
-                disabled={!modelReady || isAnalyzing}
+                disabled={!modelReady || isAnalyzing || !redditUsername.trim()}
                 isLoading={isAnalyzing}
                 size="lg"
                 icon={<ArrowRight size={20} />}

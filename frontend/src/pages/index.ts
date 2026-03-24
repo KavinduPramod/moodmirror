@@ -1,4 +1,5 @@
 export { HomePage } from './HomePage';
+export { AuthPage } from './AuthPage';
 export { CallbackPage } from './CallbackPage';
 export { DashboardPage } from './DashboardPage';
 export { ManualUploadPage } from './ManualUploadPage';

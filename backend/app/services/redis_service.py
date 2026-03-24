@@ -89,3 +89,22 @@ async def delete_session(session_token: str):
     client = get_redis_client()
     key = f"session:{session_token}"
     client.delete(key)
+
+
+def store_auth_user(username: str, data: dict):
+    """Store local auth user credentials"""
+    client = get_redis_client()
+    key = f"auth:user:{username}"
+    import json
+    client.set(key, json.dumps(data))
+
+
+def get_auth_user(username: str):
+    """Retrieve local auth user credentials"""
+    client = get_redis_client()
+    key = f"auth:user:{username}"
+    data = client.get(key)
+    if data:
+        import json
+        return json.loads(data)
+    return None

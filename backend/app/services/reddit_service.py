@@ -1,13 +1,15 @@
 """
 Reddit Service
-Handles fetching user data from Reddit API and behavioral feature extraction
+Handles fetching user data from Reddit and behavioral feature extraction
 """
 
 import requests
 import re
+import html
 from datetime import datetime
 from typing import List, Dict
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from app.config import settings
 import logging
 
@@ -26,7 +28,341 @@ class RedditService:
     
     # First-person pronouns for linguistic analysis
     FIRST_PERSON_PRONOUNS = ['i', 'me', 'my', 'mine', 'myself']
+
+    @staticmethod
+    def _build_public_headers() -> dict:
+        configured_user_agent = (settings.REDDIT_USER_AGENT or "").strip()
+        default_user_agent = "web:com.moodmirror:v1.0 (by u/moodmirrorapp)"
+        user_agent = configured_user_agent if configured_user_agent else default_user_agent
+        return {
+            "User-Agent": user_agent,
+            "Accept": "application/json",
+        }
+
+    @staticmethod
+    def _normalize_username(username: str) -> str:
+        normalized = username.strip()
+
+        # Allow users to paste full profile URLs
+        match = re.search(r"reddit\.com\/(?:user|u)\/([^\/?#]+)", normalized, re.IGNORECASE)
+        if match:
+            normalized = match.group(1)
+
+        if normalized.lower().startswith("u/"):
+            normalized = normalized[2:]
+
+        # Keep only valid Reddit username characters
+        normalized = normalized.strip().replace("\u200b", "")
+        normalized = re.sub(r"[^A-Za-z0-9_-]", "", normalized)
+        return normalized
+
+    @staticmethod
+    def _fetch_public_about(username: str, headers: dict) -> dict:
+        username_candidates = [username]
+        if username.lower() != username:
+            username_candidates.append(username.lower())
+
+        hosts = ["www.reddit.com", "old.reddit.com"]
+        paths = ["user", "u"]
+        statuses: list[int] = []
+
+        for candidate in username_candidates:
+            for host in hosts:
+                for path in paths:
+                    url = f"https://{host}/{path}/{candidate}/about.json"
+                    response = requests.get(
+                        url,
+                        headers=headers,
+                        params={"raw_json": 1},
+                        timeout=15,
+                    )
+                    statuses.append(response.status_code)
+
+                    if response.status_code == 200:
+                        payload = response.json()
+                        return payload.get("data", {}) if isinstance(payload, dict) else {}
+
+        if statuses and all(status == 404 for status in statuses):
+            logger.warning(f"about.json not found for '{username}', continuing with listing endpoints")
+            return {}
+
+        raise RuntimeError(
+            f"Reddit about fetch failed for '{username}'. Status codes tried: {statuses}"
+        )
+
+    @staticmethod
+    def _fetch_public_listing(username: str, listing: str, limit: int, headers: dict) -> list[dict]:
+        username_candidates = [username]
+        if username.lower() != username:
+            username_candidates.append(username.lower())
+
+        hosts = ["www.reddit.com", "old.reddit.com"]
+        paths = ["user", "u"]
+        statuses: list[int] = []
+
+        for candidate in username_candidates:
+            for host in hosts:
+                for path in paths:
+                    url = f"https://{host}/{path}/{candidate}/{listing}.json"
+                    response = requests.get(
+                        url,
+                        headers=headers,
+                        params={"limit": limit, "raw_json": 1},
+                        timeout=15,
+                    )
+                    statuses.append(response.status_code)
+
+                    if response.status_code == 200:
+                        payload = response.json()
+                        children = payload.get("data", {}).get("children", [])
+                        return [item.get("data", {}) for item in children if isinstance(item, dict)]
+
+        if statuses and all(status == 404 for status in statuses):
+            return []
+
+        raise RuntimeError(
+            f"Reddit {listing} fetch failed for '{username}'. Status codes tried: {statuses}"
+        )
+
+    @staticmethod
+    def _fetch_public_listing_html(username: str, listing: str, limit: int, headers: dict) -> list[dict]:
+        username_candidates = [username]
+        if username.lower() != username:
+            username_candidates.append(username.lower())
+
+        hosts = ["www.reddit.com", "old.reddit.com"]
+        paths = ["user", "u"]
+
+        for candidate in username_candidates:
+            for host in hosts:
+                for path in paths:
+                    url = f"https://{host}/{path}/{candidate}/{listing}/"
+                    try:
+                        response = requests.get(url, headers=headers, timeout=15)
+                    except Exception:
+                        continue
+
+                    if response.status_code != 200:
+                        continue
+
+                    raw_html = response.text
+                    if listing == "submitted":
+                        items = RedditService._parse_submitted_html(raw_html)
+                    else:
+                        items = RedditService._parse_comments_html(raw_html)
+
+                    if items:
+                        return items[:limit]
+
+        return []
+
+    @staticmethod
+    def _parse_submitted_html(raw_html: str) -> list[dict]:
+        posts: list[dict] = []
+        scripts = re.findall(r'<script id="data">(.*?)</script>', raw_html, flags=re.DOTALL)
+        if not scripts:
+            return posts
+
+        data_blob = html.unescape(scripts[0])
+        title_matches = re.findall(r'"title":"(.*?)"', data_blob)
+        body_matches = re.findall(r'"selftext":"(.*?)"', data_blob)
+        subreddit_matches = re.findall(r'"subredditName":"(.*?)"', data_blob)
+        permalink_matches = re.findall(r'"permalink":"(.*?)"', data_blob)
+        created_matches = re.findall(r'"created":(\d+)', data_blob)
+        score_matches = re.findall(r'"score":(\d+)', data_blob)
+
+        count = min(
+            len(title_matches),
+            len(subreddit_matches),
+            len(permalink_matches),
+            len(created_matches),
+            len(score_matches),
+        )
+
+        for idx in range(count):
+            body = body_matches[idx] if idx < len(body_matches) else ""
+            posts.append({
+                "id": f"html_sub_{idx}",
+                "title": html.unescape(title_matches[idx]),
+                "selftext": html.unescape(body),
+                "created_utc": datetime.fromtimestamp(int(created_matches[idx])).isoformat(),
+                "score": int(score_matches[idx]),
+                "subreddit": html.unescape(subreddit_matches[idx]).replace("r/", ""),
+                "url": "",
+                "permalink": f"https://reddit.com{html.unescape(permalink_matches[idx])}",
+            })
+
+        return posts
+
+    @staticmethod
+    def _parse_comments_html(raw_html: str) -> list[dict]:
+        comments: list[dict] = []
+        scripts = re.findall(r'<script id="data">(.*?)</script>', raw_html, flags=re.DOTALL)
+        if not scripts:
+            return comments
+
+        data_blob = html.unescape(scripts[0])
+        body_matches = re.findall(r'"body":"(.*?)"', data_blob)
+        subreddit_matches = re.findall(r'"subredditName":"(.*?)"', data_blob)
+        permalink_matches = re.findall(r'"permalink":"(.*?)"', data_blob)
+        created_matches = re.findall(r'"created":(\d+)', data_blob)
+        score_matches = re.findall(r'"score":(\d+)', data_blob)
+
+        count = min(
+            len(body_matches),
+            len(subreddit_matches),
+            len(permalink_matches),
+            len(created_matches),
+            len(score_matches),
+        )
+
+        for idx in range(count):
+            comments.append({
+                "id": f"html_com_{idx}",
+                "body": html.unescape(body_matches[idx]),
+                "created_utc": datetime.fromtimestamp(int(created_matches[idx])).isoformat(),
+                "score": int(score_matches[idx]),
+                "subreddit": html.unescape(subreddit_matches[idx]).replace("r/", ""),
+                "permalink": f"https://reddit.com{html.unescape(permalink_matches[idx])}",
+            })
+
+        return comments
+
+    @staticmethod
+    def _normalize_comment(comment: dict) -> dict:
+        created_utc = datetime.fromtimestamp(comment.get("created_utc", 0)).isoformat()
+        return {
+            "id": comment.get("id", ""),
+            "body": comment.get("body", ""),
+            "created_utc": created_utc,
+            "score": comment.get("score", 0),
+            "subreddit": comment.get("subreddit", ""),
+            "permalink": f"https://reddit.com{comment.get('permalink', '')}",
+        }
+
+    @staticmethod
+    def _normalize_submission(submission: dict) -> dict:
+        created_utc = datetime.fromtimestamp(submission.get("created_utc", 0)).isoformat()
+        return {
+            "id": submission.get("id", ""),
+            "title": submission.get("title", ""),
+            "selftext": submission.get("selftext", ""),
+            "created_utc": created_utc,
+            "score": submission.get("score", 0),
+            "subreddit": submission.get("subreddit", ""),
+            "url": submission.get("url", ""),
+            "permalink": f"https://reddit.com{submission.get('permalink', '')}",
+        }
     
+    @staticmethod
+    def fetch_user_activity_by_username(
+        username: str,
+        limit: int = 100,
+        include_comments: bool = True,
+        include_submissions: bool = True
+    ) -> Dict:
+        """
+        Fetch public Reddit activity by username using reddit.com JSON endpoints.
+        Fetches comments and submitted posts concurrently.
+        """
+        normalized_username = RedditService._normalize_username(username)
+        if not normalized_username:
+            raise ValueError("Reddit username is required")
+
+        headers = RedditService._build_public_headers()
+
+        # Validate username first via about.json
+        about_data = RedditService._fetch_public_about(normalized_username, headers)
+
+        comments_raw: list[dict] = []
+        submissions_raw: list[dict] = []
+
+        listings: list[str] = []
+        if include_comments:
+            listings.append("comments")
+        if include_submissions:
+            listings.append("submitted")
+
+        try:
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                future_map = {
+                    executor.submit(
+                        RedditService._fetch_public_listing,
+                        normalized_username,
+                        listing,
+                        limit,
+                        headers,
+                    ): listing
+                    for listing in listings
+                }
+
+                for future, listing in future_map.items():
+                    result = future.result()
+                    if listing == "comments":
+                        comments_raw = result
+                    else:
+                        submissions_raw = result
+
+            if include_comments and not comments_raw:
+                comments_raw = RedditService._fetch_public_listing_html(
+                    normalized_username,
+                    "comments",
+                    limit,
+                    headers,
+                )
+
+            if include_submissions and not submissions_raw:
+                submissions_raw = RedditService._fetch_public_listing_html(
+                    normalized_username,
+                    "submitted",
+                    limit,
+                    headers,
+                )
+        except ValueError:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to fetch Reddit public JSON for {normalized_username}: {e}")
+            raise
+
+        comments = [RedditService._normalize_comment(item) for item in comments_raw]
+        submissions = [RedditService._normalize_submission(item) for item in submissions_raw]
+        if not comments and not submissions:
+            raise ValueError(
+                f"No public posts/comments found for '{normalized_username}'. The username may be invalid, the account may have no public activity, or the profile may only be visible when logged in. Try opening the same JSON URLs in an incognito window to verify public access."
+            )
+
+        all_text = " ".join([
+            *[item.get("body", "") for item in comments],
+            *[f"{item.get('title', '')} {item.get('selftext', '')}".strip() for item in submissions],
+        ]).strip()
+
+        account_created = datetime.fromtimestamp(
+            about_data.get("created_utc", datetime.utcnow().timestamp())
+        ).isoformat()
+
+        activity_data = {
+            "username": normalized_username,
+            "account_created": account_created,
+            "karma": {
+                "post": about_data.get("link_karma", 0),
+                "comment": about_data.get("comment_karma", 0),
+            },
+            "comments": comments,
+            "submissions": submissions,
+            "stats": {
+                "total_comments": len(comments),
+                "total_submissions": len(submissions),
+                "total_text_length": len(all_text),
+            }
+        }
+
+        logger.info(
+            f"Fetched public Reddit data for {normalized_username}: "
+            f"{activity_data['stats']['total_comments']} comments, "
+            f"{activity_data['stats']['total_submissions']} submissions"
+        )
+        return activity_data
+
     @staticmethod
     def get_user_activity_via_api(
         access_token: str,
@@ -154,7 +490,12 @@ class RedditService:
         """
         Fetch user's Reddit activity (wrapper for backward compatibility)
         """
-        return RedditService.get_user_activity_via_api(access_token, limit)
+        return RedditService.fetch_user_activity_by_username(
+            username=access_token,
+            limit=limit,
+            include_comments=include_comments,
+            include_submissions=include_submissions,
+        )
     
     @staticmethod
     def calculate_behavioral_features(activity_data: Dict) -> Dict:

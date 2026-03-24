@@ -14,6 +14,21 @@ body {
   min-height: 100vh;
 }
 
+button,
+[role='button'],
+a,
+summary,
+input[type='button'],
+input[type='submit'],
+input[type='reset'] {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled {
+  cursor: not-allowed;
+}
+
 .bg-animated {
   position: relative;
   background: linear-gradient(135deg, #0f172a 0%, #1a1a2e 50%, #1e293b 100%);

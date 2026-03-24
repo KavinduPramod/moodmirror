@@ -49,8 +49,8 @@ export const endpoints = {
   health: '/health',
   config: '/config',
   auth: {
-    init: '/auth/reddit/init',
-    callback: '/auth/reddit/callback',
+    register: '/auth/register',
+    login: '/auth/login',
     logout: '/auth/logout',
   },
   analysis: {

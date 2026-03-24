@@ -10,12 +10,12 @@ interface AuthState {
   // State
   isAuthenticated: boolean;
   isLoading: boolean;
-  username: string | null;
+  email: string | null;
   error: string | null;
 
   // Actions
-  initOAuth: () => Promise<void>;
-  handleCallback: (code: string, state: string) => Promise<boolean>;
+  register: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   checkAuth: () => void;
   clearError: () => void;
@@ -34,78 +34,73 @@ export const useAuthStore = create<AuthState>((set) => ({
   // Initial state
   isAuthenticated: false,
   isLoading: false,
-  username: null,
+  email: null,
   error: null,
 
   // Check if user is already authenticated
   checkAuth: () => {
     const token = sessionStorage.getItem('session_token');
-    const storedUsername = sessionStorage.getItem('username');
-    if (token && storedUsername) {
-      set({ isAuthenticated: true, username: storedUsername });
+    const storedEmail = sessionStorage.getItem('email');
+    if (token && storedEmail) {
+      set({ isAuthenticated: true, email: storedEmail });
     }
   },
 
-  // Initiate Reddit OAuth flow
-  initOAuth: async () => {
+  register: async (email: string, password: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.post(endpoints.auth.init, {
-        redirect_uri: `${globalThis.location.origin}/auth/callback`,
+      const response = await api.post(endpoints.auth.register, {
+        email,
+        password,
       });
 
-      const { auth_url, state } = response.data;
-
-      // Store state for CSRF verification
-      sessionStorage.setItem('oauth_state', state);
-
-      // Redirect to Reddit
-      globalThis.location.href = auth_url;
-    } catch (err) {
-      const error = err as ApiError;
-      console.error('OAuth init failed:', error);
-      set({
-        error: error.response?.data?.detail || 'Failed to start authentication',
-        isLoading: false,
-      });
-    }
-  },
-
-  // Handle OAuth callback
-  handleCallback: async (code: string, state: string) => {
-    set({ isLoading: true, error: null });
-    try {
-      // Verify state matches
-      const storedState = sessionStorage.getItem('oauth_state');
-      if (state !== storedState) {
-        throw new Error('State mismatch - possible CSRF attack');
-      }
-
-      // Exchange code for session token
-      const response = await api.post(endpoints.auth.callback, {
-        code,
-        state,
-      });
-
-      const { session_token, username: responseUsername } = response.data;
-
-      // Store session
+      const { session_token, email: responseEmail } = response.data;
       sessionStorage.setItem('session_token', session_token);
-      sessionStorage.setItem('username', responseUsername);
-      sessionStorage.removeItem('oauth_state');
+      sessionStorage.setItem('email', responseEmail);
 
       set({
         isAuthenticated: true,
-        username: responseUsername,
+        email: responseEmail,
         isLoading: false,
       });
 
       return true;
     } catch (err) {
-      const error = err as ApiError & Error;
-      console.error('OAuth callback failed:', error);
+      const error = err as ApiError;
+      console.error('Register failed:', error);
       set({
-        error: error.response?.data?.detail || error.message || 'Authentication failed',
+        error: error.response?.data?.detail || 'Failed to register',
+        isLoading: false,
+      });
+      return false;
+    }
+  },
+
+  login: async (email: string, password: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.post(endpoints.auth.login, {
+        email,
+        password,
+      });
+
+      const { session_token, email: responseEmail } = response.data;
+
+      sessionStorage.setItem('session_token', session_token);
+      sessionStorage.setItem('email', responseEmail);
+
+      set({
+        isAuthenticated: true,
+        email: responseEmail,
+        isLoading: false,
+      });
+
+      return true;
+    } catch (err) {
+      const error = err as ApiError;
+      console.error('Login failed:', error);
+      set({
+        error: error.response?.data?.detail || 'Login failed',
         isLoading: false,
       });
       return false;
@@ -121,10 +116,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       console.error('Logout error:', error);
     } finally {
       sessionStorage.removeItem('session_token');
-      sessionStorage.removeItem('username');
+      sessionStorage.removeItem('email');
       set({
         isAuthenticated: false,
-        username: null,
+        email: null,
         isLoading: false,
       });
     }

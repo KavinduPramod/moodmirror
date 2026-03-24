@@ -11,6 +11,8 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.config import settings
 from app.services.redis_service import get_session
 import secrets
+import hashlib
+import hmac
 
 security = HTTPBearer()
 
@@ -18,6 +20,32 @@ security = HTTPBearer()
 def generate_state_token() -> str:
     """Generate secure random state token for OAuth"""
     return secrets.token_urlsafe(32)
+
+
+def hash_password(password: str) -> str:
+    salt = secrets.token_hex(16)
+    digest = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt.encode("utf-8"),
+        100_000
+    ).hex()
+    return f"{salt}:{digest}"
+
+
+def verify_password(password: str, stored_hash: str) -> bool:
+    try:
+        salt, expected_digest = stored_hash.split(":", 1)
+    except ValueError:
+        return False
+
+    digest = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt.encode("utf-8"),
+        100_000
+    ).hex()
+    return hmac.compare_digest(digest, expected_digest)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
