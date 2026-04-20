@@ -307,7 +307,7 @@ async def analyze_uploaded_data(
         # Calculate behavioral features from uploaded activity (same as Reddit analysis)
         behavioral_features = RedditService.calculate_behavioral_features(activity_data)
         
-        # Run model prediction (prediction is based on TEXT content, not features)
+        # Run model prediction with text and behavioral features
         logger.info("Running ML model prediction...")
         model_service = get_model_service()
         try:

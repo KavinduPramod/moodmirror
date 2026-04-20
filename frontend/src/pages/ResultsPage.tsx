@@ -113,9 +113,17 @@ export function ResultsPage() {
       <main className="flex-1 pt-24 pb-16">
         <div className="container-narrow">
           {/* Back Button */}
-          <Button variant="ghost" size="sm" onClick={handleNewAnalysis} className="mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              clearResult();
+              navigate('/');
+            }}
+            className="mb-6"
+          >
             <ArrowLeft size={16} />
-            Back to Dashboard
+            Back to Home
           </Button>
 
           {/* Risk Assessment Card */}
