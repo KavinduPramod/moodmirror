@@ -1,3 +1,8 @@
+<div align="center">
+  <img src="frontend/icon.svg" alt="VaultBee" width="190" />
+</div>
+
+
 # MoodMirror
 🌐 [Visit the MoodMirror Microsite](https://sites.google.com/iit.ac.lk/moodmirror/home
 **Mental Health Risk Classification System**
